@@ -1,0 +1,75 @@
+mode: rule
+
+proxy-groups:
+  - name: proxy
+    type: select
+    include-all: true
+    exclude-type: direct
+
+  - name: Google
+    type: select
+    include-all: true
+    exclude-type: direct
+
+  - name: YouTube
+    type: select
+    include-all: true
+    exclude-type: direct
+
+  - name: Telegram
+    type: select
+    include-all: true
+    exclude-type: direct
+
+  - name: Twitter
+    type: select
+    include-all: true
+    exclude-type: direct
+
+  - name: Meta
+    type: select
+    include-all: true
+    exclude-type: direct
+
+  - name: AI
+    type: select
+    include-all: true
+    exclude-type: direct
+
+rules:
+  # 阻断 QUIC/UDP 443，强制浏览器回落到 TCP
+  - AND,((NETWORK,UDP),(DST-PORT,443)),REJECT
+
+  # 本机 / 局域网直连
+  - GEOSITE,private,DIRECT
+  - GEOIP,private,DIRECT,no-resolve
+
+  # 广告白名单，必须放在广告拦截前面
+  - DOMAIN,bce.baidu.com,DIRECT
+
+  # 广告拦截
+  - GEOSITE,category-ads-all,REJECT
+
+  # Meta
+  - GEOSITE,meta,Meta
+  - GEOSITE,facebook,Meta
+  - GEOSITE,instagram,Meta
+  - GEOSITE,whatsapp,Meta
+  # AI
+  - GEOSITE,category-ai-!cn,AI
+  # Telegram
+  - GEOSITE,telegram,Telegram
+  - GEOIP,telegram,Telegram,no-resolve
+  # Google
+  - GEOSITE,google,Google
+  # YouTube
+  - GEOSITE,youtube,YouTube
+  # Twitter
+  - GEOSITE,twitter,Twitter
+
+  # 中国大陆直连
+  - GEOSITE,cn,DIRECT
+  - GEOIP,CN,DIRECT
+
+  # 其余全部走默认出口
+  - MATCH,proxy
